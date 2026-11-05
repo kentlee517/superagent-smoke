@@ -1,0 +1,30 @@
+name: superagent smoke request
+# 冒烟用：以 github-actions[bot] 身份开一个请求 issue。
+# bot 不是 agent 账号，因此不会被 GitHub Source 的 sameName 自请求过滤掉。
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open request issue as github-actions[bot]
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > /tmp/body.md <<'BODY'
+          @kentlee517 Please fix the wording in README.md: change the line
+
+          `Welcome to the smoke test repository.`
+
+          to
+
+          `Welcome to the superagent smoke test.`
+
+          This is a copy-only change. Do not modify any other file or any other content.
+          BODY
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "README: fix the greeting wording (bot)" \
+            --body-file /tmp/body.md
