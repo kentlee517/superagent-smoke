@@ -4,4 +4,4 @@ dsh-superagent 冒烟测试仓。只用来验证「GitHub issue → Trigger → 
 
 ## Notes
 
-Welcome to the smoke test repository.
+Welcome to the superagent smoke test.
