@@ -1,6 +1,6 @@
 name: superagent smoke request
 # 冒烟用：以 github-actions[bot] 身份开一个请求 issue。
-# 请求方向按 README 当前内容交替，保证每次都是「尚未交付的改动」，不会被 Eval 判成重复。
+# 每次只把 SMOKE.md 里的计数 +1（单调递进，永不撤销既有改动），因此不会被 Eval 判成重复或方向不明。
 on:
   workflow_dispatch:
 permissions:
@@ -15,20 +15,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          A='Welcome to the superagent smoke test.'
-          B='Welcome to the smoke test repository.'
-          if grep -qF "$A" README.md; then OLD="$A"; NEW="$B"; else OLD="$B"; NEW="$A"; fi
-          {
-            echo "@kentlee517 Please fix the wording in README.md: change the line"
-            echo
-            echo "\`$OLD\`"
-            echo
-            echo "to"
-            echo
-            echo "\`$NEW\`"
-            echo
-            echo "This is a copy-only change. Do not modify any other file or any other content."
-          } > /tmp/body.md
+          N=$(sed -n 's/^smoke run: *\([0-9][0-9]*\)$/\1/p' SMOKE.md | head -1)
+          N=${N:-0}
+          NEXT=$((N + 1))
+          cat > /tmp/body.md <<BODY
+          @kentlee517 Please change the line
+
+          \`smoke run: $N\`
+
+          in SMOKE.md to
+
+          \`smoke run: $NEXT\`
+
+          This is a copy-only change. Do not modify any other file or any other content.
+          BODY
           gh issue create --repo "$GITHUB_REPOSITORY" \
-            --title "README: fix the greeting wording (bot)" \
+            --title "SMOKE: bump run counter to $NEXT" \
             --body-file /tmp/body.md
